@@ -1,0 +1,51 @@
+[
+  {
+    "id": 1,
+    "nama": "Budi Santoso",
+    "nim": "10123001",
+    "kelasId": "si-3a",
+    "quote": "Tetaplah bernafas walau tugas menumpuk.",
+    "foto": "/images/budi.png",
+    "bio": "Anak rantau yang hobi ngoding sambil ngopi.",
+    "instagram": "@budisantuy",
+    "cita_cita": "CTO Gojek",
+    "role": "Programmer"
+    
+  },
+  {
+    "id": 2,
+    "nama": "Siti Aminah",
+    "nim": "10123002",
+    "kelasId": "si-3b",
+    "quote": "Rebahan adalah bagian dari coding.",
+    "foto": "https://api.dicebear.com/7.x/avataaars/svg?seed=Siti",
+    "bio": "Expert di HTML (Hanya Teman Makan Lontong).",
+    "instagram": "@siti_amin",
+    "cita_cita": "Digital Nomad",
+    "role": "Designer"
+  },
+  {
+    "id": 3,
+    "nama": "Kevin Wijaya",
+    "nim": "10123003",
+    "kelasId": "si-3a",
+    "quote": "Error hari ini, solusi tahun depan.",
+    "foto": "https://api.dicebear.com/7.x/avataaars/svg?seed=Kevin",
+    "bio": "Laptop spek dewa tapi cuma dipake buka Notepad.",
+    "instagram": "@kevin_win",
+    "cita_cita": "Pro Player",
+    "role": "Gamer"
+  },
+  {
+    "id": 4,
+    "nama": "Dinda Pertiwi",
+    "nim": "10123004",
+    "kelasId": "si-3b",
+    "quote": "Uang kas jangan lupa dibayar ya guys!",
+    "foto": "https://api.dicebear.com/7.x/avataaars/svg?seed=Dinda",
+    "bio": "Bendahara kelas yang galak tapi hatinya baik.",
+    "instagram": "@dinda_p",
+    "cita_cita": "Menteri Keuangan",
+    "role": "Hustler"
+  }
+]
