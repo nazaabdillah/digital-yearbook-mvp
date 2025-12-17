@@ -1,43 +1,9 @@
 [
   {
-    "id": "si-3a",
-    "nama": "Sistem Informasi 3-A",
-    "deskripsi": "Kelas paling solid, ratunya deadline.",
-    "cover": "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800&q=80",
-    "moments": [
-      "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&q=80",
-      "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?w=800&q=80",
-      "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&q=80"
-    ],
-    "posts": [
-      {
-        "id": 1,
-        "author": "Budi Santoso",
-        "avatar": "/images/budi.jpg",
-        "image": "https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=800&q=80",
-        "caption": "Bukber tahun lalu, jangan lupa bayar kas woi! 😂",
-        "date": "12 Maret 2024"
-      }
-    ]
-  },
-  {
-    "id": "si-3b",
-    "nama": "Sistem Informasi 3-B",
-    "deskripsi": "Diam menghanyutkan, bergerak mematikan.",
-    "cover": "https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=800&q=80",
-    "moments": [
-      "https://images.unsplash.com/photo-1543269865-cbf427effbad?w=800&q=80",
-      "https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=800&q=80"
-    ],
-    "posts": [
-      {
-        "id": 1,
-        "author": "Budi Santoso",
-        "avatar": "/images/budi.jpg",
-        "image": "https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=800&q=80",
-        "caption": "Bukber tahun lalu, jangan lupa bayar kas woi! 😂",
-        "date": "12 Maret 2024"
-      }
-    ]
+    "id": "si-3z",
+    "nama": "Sistem Informasi 3-Z (Simulasi)",
+    "deskripsi": "Kelas Eksperimen Project Yearbook.",
+    "cover": "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&q=80",
+    "posts": []
   }
 ]
