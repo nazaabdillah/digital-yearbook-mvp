@@ -10,8 +10,8 @@ import secretsData from '../data/secrets.json';
 import CreatePostModal from '../components/CreatePostModal'; // <--- Import Baru
 
 export default function Home() {
-  const [selectedClass, setSelectedClass] = useState(null);
-  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [selectedClass, setSelectedClass] = useState<any>(null);
+  const [selectedStudent, setSelectedStudent] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
   
   // STATE BARU: Untuk Mengelola Postingan
