@@ -3,42 +3,35 @@
 import React, { useState, useEffect } from 'react';
 import studentsData from '../data/students.json';
 import classesData from '../data/classes.json';
+import secretsData from '../data/secrets.json';
 import StudentCard from '../components/StudentCard';
 import StudentModal from '../components/StudentModal';
 import Footer from '../components/Footer';
-import secretsData from '../data/secrets.json';
-import CreatePostModal from '../components/CreatePostModal';
+import FloatingMusic from '../components/FloatingMusic';
+import SecretWall from '../components/SecretWall'; // <--- Import Ini
 
 export default function Home() {
-  // Fix 1: Tambahkan <any> biar TypeScript gak rewel soal tipe data null
   const [selectedClass, setSelectedClass] = useState<any>(null);
   const [selectedStudent, setSelectedStudent] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  
-  // Fix 2: Tambahkan <any[]> biar dia tau ini list objek, bukan list kosong abadi
-  const [showPostModal, setShowPostModal] = useState(false);
   const [classPosts, setClassPosts] = useState<any[]>([]); 
+  const [isScrolled, setIsScrolled] = useState(false); // Deteksi scroll untuk sticky header
 
   useEffect(() => {
     if (selectedClass) {
       setClassPosts(selectedClass.posts || []);
+      window.scrollTo({ top: 0, behavior: 'smooth' }); // Auto scroll ke atas pas ganti kelas
     }
   }, [selectedClass]);
 
-  // Fix 3 (UTAMA): Tambahkan ': any' di parameter postData
-  const handleNewPost = (postData: any) => {
-    const newPostObject = {
-      id: Date.now(),
-      author: "Kamu (Guest)",
-      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Guest",
-      image: postData.image,
-      caption: postData.caption,
-      date: postData.date
+  // Efek untuk mendeteksi scroll (biar header berubah warna)
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
     };
-
-    setClassPosts([newPostObject, ...classPosts]);
-    setShowPostModal(false);
-  };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleBackToMenu = () => {
     setSelectedClass(null);
@@ -53,172 +46,203 @@ export default function Home() {
   );
 
   return (
-    <main className="min-h-screen bg-gray-50 font-sans">
+    <main className="min-h-screen font-sans text-gray-800 relative overflow-x-hidden">
       
+      {/* 1. BACKGROUND AURORA (ANIMATED GRADIENT) */}
+      <div className="fixed inset-0 -z-50 bg-[#f8fafc]">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-blue-200/30 blur-[100px] animate-spin-slow" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-purple-200/30 blur-[100px] animate-spin-slow" />
+      </div>
+
       {!selectedClass ? (
-        // === TAMPILAN MENU KELAS (LANDING PAGE) ===
-        <div className="max-w-6xl mx-auto p-8 min-h-screen flex flex-col justify-center">
+        // === HALAMAN DEPAN (LANDING PAGE) ===
+        <div className="max-w-6xl mx-auto p-8 min-h-screen flex flex-col justify-center animate-fade-in">
              
-             {/* Header Judul */}
-             <div className="text-center mb-12">
-                <h1 className="text-5xl font-extrabold text-blue-900 mb-4">Welcome to Yearbook</h1>
-                <p className="text-xl text-gray-600">Pilih kelas untuk melihat kenangan kami</p>
+             {/* Header Judul dengan Gradient Text */}
+             <div className="text-center mb-16 space-y-4">
+                <span className="px-4 py-1.5 rounded-full bg-blue-50 text-blue-600 text-xs font-bold tracking-widest border border-blue-100 uppercase">
+                  Digital Yearbook 2025
+                </span>
+                <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight">
+                  <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
+                    Kenangan Abadi
+                  </span>
+                  <br />
+                  <span className="text-gray-900">Masa Putih Abu</span>
+                </h1>
+                <p className="text-xl text-gray-500 max-w-2xl mx-auto leading-relaxed">
+                  Setiap wajah punya cerita, setiap kelas punya legenda. Pilih kelasmu dan putar kembali waktu.
+                </p>
              </div>
 
-             {/* Grid Daftar Kelas */}
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20">
+             {/* Grid Kelas */}
+              {/* Grid Kelas - CINEMATIC REVEAL STYLE */}
+             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 mb-24 px-4">
                 {classesData.map((kelas) => (
                   <div 
                     key={kelas.id}
                     onClick={() => setSelectedClass(kelas)} 
-                    className="group cursor-pointer bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all hover:-translate-y-1"
+                    // Container Utama: Rounded besar, Shadow tebal,Overflow hidden wajib!
+                    className="group relative h-[400px] rounded-[2.5rem] overflow-hidden cursor-pointer shadow-2xl shadow-blue-900/20 transition-all duration-500 hover:shadow-blue-900/40 hover:-translate-y-3"
                   >
-                    <div className="h-48 overflow-hidden relative">
-                       <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-all z-10"/>
-                       <img src={kelas.cover} alt={kelas.nama} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                    </div>
-                    <div className="p-8 text-center">
-                      <h2 className="text-2xl font-bold text-gray-800 mb-2">{kelas.nama}</h2>
-                      <p className="text-gray-500">{kelas.deskripsi}</p>
-                      <button className="mt-4 text-blue-600 font-bold group-hover:underline">Buka Galeri &rarr;</button>
+                    {/* 1. Gambar Background (Zoom In saat hover) */}
+                    <img 
+                        src={kelas.cover} 
+                        alt={kelas.nama} 
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" 
+                    />
+                    
+                    {/* 2. Overlay Gradient Gelap (Selalu ada tapi tipis) */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent transition-opacity duration-500 group-hover:from-black/80" />
+
+                    {/* 3. Konten Tulisan (Judul selalu muncul, Deskripsi muncul saat hover) */}
+                    <div className="absolute inset-0 p-8 flex flex-col justify-end text-white z-20">
+                        {/* Badge Tahun/Angkatan */}
+                        <div className="self-start mb-4 overflow-hidden">
+                             <span className="inline-block px-3 py-1 text-xs font-bold bg-blue-600/80 backdrop-blur-md rounded-full transform transition-transform duration-500 translate-y-10 group-hover:translate-y-0">
+                                CLASS OF 2025
+                             </span>
+                        </div>
+
+                        {/* Judul Kelas Besar */}
+                        <h2 className="text-4xl font-extrabold mb-2 drop-shadow-lg transform transition-all duration-500 group-hover:-translate-y-2">
+                            {kelas.nama}
+                        </h2>
+                        
+                        {/* Deskripsi & Tombol (Disembunyikan di bawah layar, muncul saat hover) */}
+                        <div className="transform translate-y-full transition-transform duration-500 group-hover:translate-y-0 opacity-0 group-hover:opacity-100">
+                            <p className="text-gray-200 text-sm mb-6 line-clamp-2 drop-shadow-md">
+                                {kelas.deskripsi}
+                            </p>
+                            
+                             {/* Tombol "Jelajahi" yang menggoda */}
+                            <button className="bg-white text-blue-900 px-6 py-3 rounded-full font-bold text-sm flex items-center gap-2 transition-all hover:bg-blue-50 hover:gap-4 active:scale-95">
+                                Jelajahi Album
+                                <span>→</span>
+                            </button>
+                        </div>
                     </div>
                   </div>
                 ))}
              </div>
 
-             {/* === KOTAK SURAT RAHASIA (Posisi di Halaman Depan) === */}
-             <div className="mb-12">
-                <div className="text-center mb-8">
-                  <h2 className="text-3xl font-bold text-gray-800">💌 Kotak Surat Rahasia</h2>
-                  <p className="text-gray-500">Pesan-pesan misterius dari warga angkatan.</p>
-                </div>
-
-                <div className="columns-1 md:columns-3 gap-6 space-y-6">
-                  {secretsData.map((secret) => (
-                    <div key={secret.id} className={`break-inside-avoid p-6 rounded-xl shadow-sm border border-gray-100 ${secret.color} hover:scale-105 transition-transform duration-300`}>
-                      <p className="text-gray-700 font-handwriting text-lg leading-relaxed">"{secret.message}"</p>
-                      <div className="mt-4 flex justify-between items-center">
-                        <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Anonymous</span>
-                        <span className="text-lg">🤫</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-10 text-center">
-                  <button 
-                    onClick={() => alert("Fitur Kirim Pesan sedang dimatikan sementara untuk moderasi konten! \n(Ini cuma simulasi keamanan ya Bos! 😉)")}
-                    className="bg-gray-900 text-white px-8 py-3 rounded-full font-bold shadow-lg hover:bg-gray-800 transition-all active:scale-95"
-                  >
-                    + Kirim Pesan Rahasia
-                  </button>
-                  <p className="text-xs text-gray-400 mt-3">*Pesan akan direview admin sebelum tampil.</p>
-                </div>
-             </div>
+             {/* Secret Message Section */}
+              <div className="mb-24">
+                <SecretWall />
+              </div>
 
              <Footer />
         </div>
       ) : (
         
-        // === TAMPILAN DETAIL KELAS ===
-        <div className="p-4 md:p-8">
+        // === HALAMAN DETAIL KELAS (UPGRADED UX) ===
+        <div className="animate-slide-up pb-20">
           
-          {/* Header & Navigasi */}
-          <div className="max-w-4xl mx-auto mb-8">
-            <button onClick={handleBackToMenu} className="text-gray-500 hover:text-blue-600 font-bold mb-4">
-              &larr; Kembali
-            </button>
-            <h1 className="text-3xl md:text-4xl font-extrabold text-blue-900">{selectedClass.nama}</h1>
-          </div>
-
-          {/* === BAGIAN 1: FEED / POSTINGAN === */}
-          <div className="max-w-2xl mx-auto mb-16">
-            <div className="flex justify-between items-end mb-6">
-              <div>
-                <h3 className="text-2xl font-bold text-gray-800">Timeline Kelas 📢</h3>
-                <p className="text-gray-500 text-sm">Update seru dari warga kelas</p>
+          {/* 2. STICKY GLASS HEADER (NAVIGASI CANGGIH) */}
+          <div className={`sticky top-0 z-40 transition-all duration-300 ${isScrolled ? 'bg-white/80 backdrop-blur-lg shadow-sm py-3' : 'bg-transparent py-6'}`}>
+            <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
+              
+              <div className="flex items-center gap-4 w-full md:w-auto">
+                <button 
+                  onClick={handleBackToMenu} 
+                  className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-100 transition-colors shadow-sm"
+                >
+                  ←
+                </button>
+                <div>
+                   <h1 className={`font-bold text-gray-900 transition-all ${isScrolled ? 'text-xl' : 'text-2xl md:text-3xl'}`}>
+                     {selectedClass.nama}
+                   </h1>
+                   {!isScrolled && <p className="text-gray-500 text-sm hidden md:block">Album Kenangan Resmi</p>}
+                </div>
               </div>
-              {/* FITUR UPLOAD KITA HIDE DULU UNTUK VERSI PUBLIK/BISNIS 
-              <button 
-                onClick={() => setShowPostModal(true)}
-                className="bg-blue-600 text-white px-4 py-2 rounded-full font-bold shadow-lg hover:bg-blue-700 active:scale-95 transition-all text-sm flex items-center gap-2"
-              >
-                <span>+</span> Buat Post
-              </button>
-              */}
-            </div>
 
-            {/* List Postingan */}
-            <div className="space-y-6">
-              {classPosts.map((post) => (
-                <div key={post.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                  <div className="p-4 flex items-center gap-3">
-                    <img src={post.avatar || "/images/budi.jpg"} className="w-10 h-10 rounded-full bg-gray-200" />
-                    <div>
-                      <p className="font-bold text-gray-900 text-sm">{post.author}</p>
-                      <p className="text-gray-400 text-xs">{post.date}</p>
-                    </div>
-                  </div>
-                  <img src={post.image} className="w-full h-auto object-cover max-h-96 bg-gray-100" />
-                  <div className="p-4">
-                    <p className="text-gray-700 text-sm leading-relaxed">
-                      <span className="font-bold mr-2">{post.author}</span>
-                      {post.caption}
-                    </p>
-                  </div>
-                </div>
-              ))}
-
-              {classPosts.length === 0 && (
-                <div className="text-center py-10 bg-white rounded-xl border border-dashed border-gray-300">
-                  <p className="text-gray-400">Belum ada postingan. Jadilah yang pertama!</p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <hr className="border-gray-200 my-12 max-w-4xl mx-auto" />
-
-          {/* === BAGIAN 2: DAFTAR SISWA === */}
-          <div className="max-w-6xl mx-auto">
-             <h3 className="text-2xl font-bold text-gray-800 mb-6 text-center">Daftar Warga Kelas 🎓</h3>
-             
-             <div className="mb-8 flex justify-center">
+              {/* Search Bar yang selalu ada di atas */}
+              <div className="relative w-full md:w-96">
                 <input 
                   type="text"
-                  placeholder="Cari teman..."
-                  className="w-full max-w-md p-3 rounded-full border border-gray-200 shadow-sm focus:ring-2 focus:ring-blue-500 outline-none text-center"
+                  placeholder="Cari nama teman / role..."
+                  className="w-full pl-12 pr-4 py-3 rounded-full bg-white border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all shadow-sm text-sm"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
-             </div>
-
-             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
-              {filteredStudents.map((student) => (
-                <StudentCard 
-                  key={student.id}
-                  nama={student.nama}
-                  nim={student.nim}
-                  quote={student.quote}
-                  foto={student.foto}
-                  role={student.role}
-                  onClick={() => setSelectedStudent(student)} 
-                />
-              ))}
+                <span className="absolute left-4 top-3 text-gray-400">🔍</span>
+              </div>
             </div>
           </div>
 
-          <Footer />
+          <div className="max-w-6xl mx-auto px-6 mt-8">
+            
+            {/* Timeline Gallery */}
+            <div className="mb-16">
+               <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
+                 📸 Momen Terbaik
+                 <span className="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-full font-normal">Scroll ke samping</span>
+               </h3>
+               
+               {/* Horizontal Scroll Container */}
+               <div className="flex gap-4 overflow-x-auto pb-6 scrollbar-hide snap-x">
+                  {classPosts.length > 0 ? classPosts.map((post) => (
+                    <div key={post.id} className="snap-center shrink-0 w-[300px] md:w-[400px] group relative rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all">
+                      <img src={post.image} className="w-full h-64 object-cover" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-100" />
+                      <div className="absolute bottom-0 left-0 p-4 text-white">
+                        <p className="text-sm font-bold opacity-90">{post.author}</p>
+                        <p className="text-xs opacity-70 mb-1">{post.date}</p>
+                        <p className="text-sm line-clamp-2">"{post.caption}"</p>
+                      </div>
+                    </div>
+                  )) : (
+                    <div className="w-full text-center py-10 bg-white/50 border border-dashed rounded-xl">
+                      <p className="text-gray-400">Belum ada momen yang diabadikan.</p>
+                    </div>
+                  )}
+               </div>
+            </div>
 
-          {/* Render Modal Post */}
-          {showPostModal && (
-            <CreatePostModal 
-              onClose={() => setShowPostModal(false)}
-              onSubmit={handleNewPost}
-            />
-          )}
+            <hr className="border-gray-200 mb-12" />
 
-          {/* Render Modal Siswa */}
+            {/* Grid Siswa (Lezat Maksimal) */}
+            <div>
+               <div className="flex justify-between items-end mb-8">
+                 <h3 className="text-2xl font-bold text-gray-800">
+                   Warga Kelas 
+                   <span className="ml-2 text-sm font-normal text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                     {filteredStudents.length} Siswa
+                   </span>
+                 </h3>
+               </div>
+
+               {filteredStudents.length > 0 ? (
+                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                  {filteredStudents.map((student) => (
+                    // Disini StudentCard sudah ada efek Tilt dari kode sebelumnya
+                    <StudentCard 
+                      key={student.id}
+                      nama={student.nama}
+                      nim={student.nim}
+                      quote={student.quote}
+                      foto={student.foto}
+                      role={student.role}
+                      onClick={() => setSelectedStudent(student)} 
+                    />
+                  ))}
+                </div>
+               ) : (
+                 <div className="text-center py-20">
+                   <div className="text-6xl mb-4">🤔</div>
+                   <h3 className="text-xl font-bold text-gray-800">Waduh, nggak ketemu!</h3>
+                   <p className="text-gray-500">Coba cari nama panggilan atau cek ejaan lagi.</p>
+                 </div>
+               )}
+            </div>
+
+          </div>
+
+          <div className="mt-20">
+             <Footer />
+          </div>
+
           {selectedStudent && (
             <StudentModal 
               student={selectedStudent} 
@@ -228,6 +252,10 @@ export default function Home() {
 
         </div>
       )}
+
+      {/* Floating Music tetap setia menemani */}
+      <FloatingMusic />
+
     </main>
   );
 }
