@@ -1,6 +1,10 @@
 import React, { useState, useRef } from 'react';
 
-export default function FloatingMusic() {
+interface FloatingMusicProps {
+  minimal?: boolean; // Props baru: Mode Mini
+}
+
+export default function FloatingMusic({ minimal = false }: FloatingMusicProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -15,60 +19,66 @@ export default function FloatingMusic() {
     }
   };
 
+  // LOGIC STYLE:
+  // Kalau Minimal: Bulat kecil, di pojok kiri bawah (desktop) atau kanan atas/bawah (mobile)
+  // Kalau Full: Kapsul lebar
+  
+  const containerStyle = minimal 
+    ? "bg-black/80 w-12 h-12 rounded-full justify-center" // Mode Mini (Bulat)
+    : "bg-[#121212]/90 w-auto rounded-full px-2 py-2 pr-5 gap-3"; // Mode Full (Kapsul)
+
   return (
-    // Container utama dibuat lebih besar dan glassmorphism lebih kuat
-    <div className="fixed bottom-8 left-8 z-50 animate-slide-up group">
-        
-      {/* Ganti src dengan file lokalmu: "/music/anthem.mp3" */}
+    <div className={`fixed z-50 transition-all duration-500 ease-in-out
+      ${minimal 
+         ? "bottom-6 right-6 md:bottom-8 md:left-8" // Posisi Mini (Pojok)
+         : "bottom-24 left-1/2 -translate-x-1/2 md:bottom-8 md:left-8 md:translate-x-0" // Posisi Full (Tengah/Kiri)
+       }
+    `}>
       <audio ref={audioRef} src="/music/anthem.mp3" loop />
 
-      <div className={`relative bg-white/80 backdrop-blur-xl p-3 rounded-full shadow-2xl border border-white/50 flex items-center gap-4 transition-all duration-500 hover:scale-105 hover:bg-white/95 hover:shadow-blue-200/50 ${isPlaying ? 'pr-6 ring-4 ring-blue-400/20' : 'pr-3'}`}>
+      <button 
+        onClick={togglePlay}
+        className={`
+            backdrop-blur-md text-white shadow-2xl border border-white/10 ring-1 ring-black/20 
+            flex items-center hover:scale-105 transition-all group overflow-hidden
+            ${containerStyle}
+        `}
+      >
         
-        {/* EFEK BARU: Nada Melayang (Hanya muncul saat Play) */}
-        {isPlaying && (
-            <div className="absolute -top-8 left-1/2 -translate-x-1/2 pointer-events-none">
-                <span className="absolute text-xl text-blue-500 animate-float-note-1">🎵</span>
-                <span className="absolute text-lg text-purple-500 animate-float-note-2 left-4">🎼</span>
-                <span className="absolute text-sm text-pink-500 animate-float-note-3 -left-4">✨</span>
-            </div>
-        )}
-
-        {/* Tombol Vinyl */}
-        <button 
-          onClick={togglePlay}
-          className="relative w-12 h-12 rounded-full flex items-center justify-center overflow-hidden shadow-lg group-hover:shadow-xl transition-shadow"
-        >
-            {/* Gambar Vinyl berputar */}
+        {/* 1. VINYL ANIMATION */}
+        {/* Di mode mini, ini jadi tombol utamanya */}
+        <div className={`relative shrink-0 border border-gray-700 rounded-full overflow-hidden ${minimal ? 'w-8 h-8' : 'w-10 h-10'} ${isPlaying ? 'animate-spin-slow' : ''}`}>
            <img 
-             src="https://cdn-icons-png.flaticon.com/512/10885/10885201.png" // Icon Vinyl Keren
-             alt="Vinyl"
-             className={`w-full h-full object-cover ${isPlaying ? 'animate-spin-slow' : ''}`}
+             src="https://cdn-icons-png.flaticon.com/512/10885/10885201.png" 
+             alt="Music"
+             className={`w-full h-full object-cover transition-opacity ${minimal ? 'opacity-100' : 'opacity-80 group-hover:opacity-100'}`}
            />
-           {/* Lubang tengah & Icon Play/Pause */}
-           <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                <span className="text-white text-lg drop-shadow-md">
-                     {isPlaying ? '⏸' : '▶'}
-                </span>
-           </div>
-        </button>
-
-        {/* Teks Info (Melebar saat hover atau play) */}
-        <div className={`flex flex-col overflow-hidden transition-all duration-500 ${isPlaying || 'group-hover:w-32 w-0 opacity-0 group-hover:opacity-100'} ${isPlaying ? 'w-32 opacity-100' : ''}`}>
-          <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider whitespace-nowrap">Now Playing</span>
-          <span className="text-xs font-medium text-gray-700 truncate leading-tight whitespace-nowrap">
-            Anthem Angkatan
-          </span>
+           <div className="absolute inset-0 m-auto w-1.5 h-1.5 bg-[#121212] rounded-full border border-gray-600" />
         </div>
 
-        {/* Visualizer Bar (Hanya muncul saat Play) */}
-        {isPlaying && (
-             <div className="flex items-end gap-[3px] h-4">
-                <span className="w-1 bg-blue-400 rounded-full animate-music-bar-1 h-full"></span>
-                <span className="w-1 bg-purple-400 rounded-full animate-music-bar-2 h-3"></span>
-                <span className="w-1 bg-pink-400 rounded-full animate-music-bar-3 h-full"></span>
+        {/* 2. INFO & CONTROLS (Hanya muncul di Mode Full) */}
+        {!minimal && (
+          <>
+            <div className="flex flex-col min-w-[90px] text-left">
+              <span className="text-xs font-bold text-white leading-tight truncate max-w-[120px]">
+                Laskar Pelangi
+              </span>
+              <span className="text-[10px] text-gray-400 leading-tight flex items-center gap-1">
+                {isPlaying ? <span className="text-green-500 animate-pulse">Playing...</span> : "Nidji"}
+              </span>
             </div>
+
+            {/* Tombol Play/Pause Hijau (Icon Only) */}
+            <div className="w-8 h-8 rounded-full bg-[#1ed760] text-black flex items-center justify-center shadow-lg">
+              {isPlaying ? (
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path fillRule="evenodd" d="M6.75 5.25a.75.75 0 01.75-.75H9a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75H7.5a.75.75 0 01-.75-.75V5.25zm7.5 0A.75.75 0 0115 4.5h1.5a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75H15a.75.75 0 01-.75-.75V5.25z" clipRule="evenodd" /></svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 ml-0.5"><path fillRule="evenodd" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" clipRule="evenodd" /></svg>
+              )}
+            </div>
+          </>
         )}
-      </div>
+      </button>
     </div>
   );
 }

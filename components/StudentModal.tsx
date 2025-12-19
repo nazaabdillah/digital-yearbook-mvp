@@ -1,81 +1,88 @@
 import React from 'react';
 
-// Kita definisikan tipe data khusus untuk Modal
-interface ModalProps {
-  student: any;         // Data siswa yang sedang dipilih
-  onClose: () => void;  // Fungsi untuk menutup modal
+interface StudentModalProps {
+  student: any;
+  onClose: () => void;
 }
 
-export default function StudentModal({ student, onClose }: ModalProps) {
-  if (!student) return null; // Jaga-jaga kalau datanya kosong, jangan render apa-apa
+export default function StudentModal({ student, onClose }: StudentModalProps) {
+  if (!student) return null;
+
+  // === SAFETY CHECK ===
+  // Cek apakah ada instagram? Kalau ada, buang @ nya. Kalau tidak, set string kosong.
+  const instagramUsername = student.instagram 
+    ? student.instagram.replace('@', '').trim() 
+    : '';
 
   return (
-    // 1. Overlay Hitam Transparan (Background)
-    // Saat area hitam diklik, jalankan fungsi onClose (tutup modal)
-    <div 
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
-      onClick={onClose}
-    >
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 animate-fade-in">
       
-      {/* 2. Kotak Modal (Konten Utama) */}
-      {/* onClick stopPropagation: Biar kalau klik kotak putih, modalnya GAK ketutup */}
+      {/* Backdrop Gelap (Klik buat tutup) */}
       <div 
-        className="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden relative animate-bounce-in"
-        onClick={(e) => e.stopPropagation()}
-      >
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+        onClick={onClose}
+      />
+
+      {/* Modal Content */}
+      <div className="relative bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl animate-scale-up">
         
-        {/* Tombol Close (X) di pojok kanan atas */}
+        {/* Tombol Close */}
         <button 
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition-colors bg-white/80 rounded-full p-1"
+          className="absolute top-4 right-4 z-10 w-8 h-8 bg-black/20 hover:bg-black/40 text-white rounded-full flex items-center justify-center transition-all backdrop-blur-md"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
+          ✕
         </button>
 
-        {/* Layout Modal: Header Gambar + Konten */}
-        <div className="flex flex-col">
-          {/* Header Warna / Foto */}
-          <div className="h-32 bg-gradient-to-r from-blue-500 to-purple-600"></div>
-          
-          {/* Foto Profil Nyembul ke Atas (-mt-16) */}
-          <div className="px-6 relative">
-            <div className="-mt-16 border-4 border-white rounded-full w-32 h-32 overflow-hidden shadow-lg mx-auto">
-              <img src={student.foto} alt={student.nama} className="w-full h-full object-cover" />
-            </div>
-            
-            <div className="text-center mt-4">
-              <h2 className="text-2xl font-bold text-gray-800">{student.nama}</h2>
-              <p className="text-blue-600 font-medium">{student.nim} • {student.cita_cita}</p>
-            </div>
-          </div>
-
-          {/* Body Konten */}
-          <div className="p-6 space-y-4">
-             {/* Bio */}
-            <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
-              <h3 className="text-xs uppercase text-gray-400 font-bold mb-1">Bio Singkat</h3>
-              <p className="text-gray-700 italic">"{student.bio}"</p>
-            </div>
-
-            {/* Quote */}
-            <div>
-               <h3 className="text-xs uppercase text-gray-400 font-bold mb-1">Quote Andalan</h3>
-               <p className="text-gray-800 font-serif text-lg">“{student.quote}”</p>
-            </div>
-
-            {/* Instagram Link Button */}
-            <a 
-              href={`https://instagram.com/${student.instagram.replace('@', '')}`} 
-              target="_blank" 
-              className="block w-full text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-all"
-            >
-              Follow {student.instagram}
-            </a>
-          </div>
+        {/* Foto Header Besar */}
+        <div className="h-64 relative bg-gray-200">
+           <img 
+             src={student.foto || `https://api.dicebear.com/7.x/avataaars/svg?seed=${student.nama}`} 
+             alt={student.nama}
+             className="w-full h-full object-cover"
+           />
+           {/* Gradient Overlay biar teks putih kebaca */}
+           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+           
+           <div className="absolute bottom-0 left-0 p-6 text-white">
+             <span className="bg-blue-600 text-xs font-bold px-2 py-1 rounded-md mb-2 inline-block border border-blue-400">
+               {student.role || "Siswa"}
+             </span>
+             <h2 className="text-3xl font-bold leading-tight">{student.nama}</h2>
+             <p className="text-white/80 font-mono text-sm mt-1">{student.nim}</p>
+           </div>
         </div>
 
+        {/* Body Content */}
+        <div className="p-6 space-y-6">
+           
+           {/* Quote Section */}
+           <div className="relative pl-4 border-l-4 border-blue-500 bg-blue-50 p-4 rounded-r-xl">
+             <span className="text-4xl text-blue-200 absolute top-0 left-2">"</span>
+             <p className="text-gray-700 italic font-medium relative z-10">
+               {student.quote || "Tidak ada kata-kata hari ini."}
+             </p>
+           </div>
+
+           {/* Tombol Instagram (HANYA MUNCUL KALAU ADA USERNAME) */}
+           {instagramUsername ? (
+               <a 
+                 href={`https://instagram.com/${instagramUsername}`} 
+                 target="_blank" 
+                 rel="noopener noreferrer"
+                 className="block w-full text-center bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold py-3 rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all flex items-center justify-center gap-2"
+               >
+                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+                 Follow @{instagramUsername}
+               </a>
+           ) : (
+               // Tampilan kalau tidak ada IG (Disabled Button)
+               <button disabled className="block w-full text-center bg-gray-100 text-gray-400 font-bold py-3 rounded-xl cursor-not-allowed border border-gray-200">
+                 🚫 No Social Media
+               </button>
+           )}
+
+        </div>
       </div>
     </div>
   );
